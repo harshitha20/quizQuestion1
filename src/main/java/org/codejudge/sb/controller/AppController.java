@@ -4,8 +4,10 @@ import io.swagger.annotations.ApiOperation;
 import org.codejudge.sb.controller.model.Error;
 import org.codejudge.sb.controller.model.Question;
 import org.codejudge.sb.controller.model.Quiz;
+import org.codejudge.sb.controller.model.QuizQuestion;
 import org.codejudge.sb.controller.serviceImpl.errorServiceImpl;
 import org.codejudge.sb.controller.serviceImpl.questionServiceImpl;
+import org.codejudge.sb.controller.serviceImpl.quizQuestionServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,6 +29,9 @@ public class AppController {
 
     @Autowired
     private questionServiceImpl questionServiceImpl;
+
+    @Autowired
+    private quizQuestionServiceImpl quizQuestionServiceImpl;
 
     @ApiOperation("This is the hello world api")
     @GetMapping("/")
@@ -109,6 +114,17 @@ public class AppController {
         {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(3)));
         }
+    }
+
+    @GetMapping("/api/quiz-questions/{quiz_id}")
+    public ResponseEntity questionByQuizId(@PathVariable Long quiz_id)
+    {
+        QuizQuestion quiz = quizQuestionServiceImpl.findQuizQuestionById(quiz_id);
+        if(quiz==null || (quiz!=null && quiz.getQuestionList()==null))
+        {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new EmptyJsonBody());
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(quiz);
     }
 
 }

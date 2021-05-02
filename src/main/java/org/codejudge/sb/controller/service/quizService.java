@@ -8,4 +8,5 @@ public interface quizService {
     public Quiz findById(Long id);
 
     public Quiz loadData(Quiz quiz);
+
 }
