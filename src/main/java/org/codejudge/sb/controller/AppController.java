@@ -120,7 +120,7 @@ public class AppController {
     @GetMapping("/api/quiz-questions/{quiz_id}")
     public ResponseEntity questionByQuizId(@PathVariable Long quiz_id) {
         QuizQuestion quiz = quizQuestionServiceImpl.findQuizQuestionById(quiz_id);
-        if (quiz == null || (quiz != null && quiz.getQuestionList() == null)) {
+        if (quiz == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new EmptyJsonBody());
         }
         return ResponseEntity.status(HttpStatus.OK).body(quiz);
