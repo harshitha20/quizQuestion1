@@ -1,13 +1,14 @@
 package org.codejudge.sb.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
-import org.codejudge.sb.controller.model.Error;
 import org.codejudge.sb.controller.model.Question;
 import org.codejudge.sb.controller.model.Quiz;
 import org.codejudge.sb.controller.model.QuizQuestion;
 import org.codejudge.sb.controller.serviceImpl.errorServiceImpl;
 import org.codejudge.sb.controller.serviceImpl.questionServiceImpl;
 import org.codejudge.sb.controller.serviceImpl.quizQuestionServiceImpl;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,88 +41,78 @@ public class AppController {
     }
 
     @GetMapping("/api/quiz/{quiz_id}")
-    public ResponseEntity findById(@PathVariable Long quiz_id)
-    {
+    public ResponseEntity findById(@PathVariable Long quiz_id) {
         Quiz quiz = quizService.findById(quiz_id);
-        if(quiz==null)
-        {
+        if (quiz == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new EmptyJsonBody());
         }
         return ResponseEntity.status(HttpStatus.OK).body(quiz);
     }
 
-    /*@GetMapping("/api/quiz/")
-    public ResponseEntity<Error> findError()
-    {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(1)));
-    }
-*/
-    @RequestMapping(path = "/api/quiz/",method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path = "/api/quiz/", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity addQuiz(@RequestBody Quiz quiz)
-    {
-        Quiz newQuiz = quiz;
+    public ResponseEntity addQuiz(@RequestBody String quiz) {
+        JSONObject json = new JSONObject(quiz);
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            quizService.loadData(quiz);
-            return ResponseEntity.status(HttpStatus.CREATED).body(quiz);
-        }
-        catch (Exception e)
-        {
+            if(!json.has("id") && json.has("name") && json.has("description")) {
+                String name = json.get("name").toString();
+                String description = json.get("description").toString();
+                Quiz newQuiz = new Quiz();
+                newQuiz.setName(name);
+                newQuiz.setDescription(description);
+                quizService.loadData(newQuiz);
+                return ResponseEntity.status(HttpStatus.CREATED).body(newQuiz);
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(6)));
+        } catch (
+                Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(2)));
         }
+
     }
 
     @GetMapping("/api/questions/{question_id}")
-    public ResponseEntity findQuestionById(@PathVariable Long question_id)
-    {
+    public ResponseEntity findQuestionById(@PathVariable Long question_id) {
         Question question = questionServiceImpl.findById(question_id);
-        if(question==null)
-        {
+        if (question == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new EmptyJsonBody());
         }
         return ResponseEntity.status(HttpStatus.OK).body(question);
     }
 
     @GetMapping("/api/*/")
-    public ResponseEntity entityIdNotProvided()
-    {
+    public ResponseEntity entityIdNotProvided() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(1)));
     }
 
-    @RequestMapping(path = "/api/questions/",method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path = "/api/questions/", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity addQuestion(@RequestBody Question question)
-    {
+    public ResponseEntity addQuestion(@RequestBody Question question) {
         Question newQuestion = question;
-        if(newQuestion!=null) {
+        if (newQuestion != null) {
             String options = newQuestion.getOptions();
             List optionsList = Arrays.asList(options.split(","));
-            if(optionsList.size()>0 && (newQuestion.getCorrect_option()>optionsList.size() || newQuestion.getCorrect_option()<=0))
-            {
+            if (optionsList.size() > 0 && (newQuestion.getCorrect_option() > optionsList.size() || newQuestion.getCorrect_option() <= 0)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(4)));
             }
             Long quiz_id = newQuestion.getQuiz();
-            if(quizService.findById(quiz_id)==null)
-            {
+            if (quizService.findById(quiz_id) == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(5)));
             }
         }
         try {
             questionServiceImpl.loadData(newQuestion);
             return ResponseEntity.status(HttpStatus.CREATED).body(question);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(3)));
         }
     }
 
     @GetMapping("/api/quiz-questions/{quiz_id}")
-    public ResponseEntity questionByQuizId(@PathVariable Long quiz_id)
-    {
+    public ResponseEntity questionByQuizId(@PathVariable Long quiz_id) {
         QuizQuestion quiz = quizQuestionServiceImpl.findQuizQuestionById(quiz_id);
-        if(quiz==null || (quiz!=null && quiz.getQuestionList()==null))
-        {
+        if (quiz == null || (quiz != null && quiz.getQuestionList() == null)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new EmptyJsonBody());
         }
         return ResponseEntity.status(HttpStatus.OK).body(quiz);
