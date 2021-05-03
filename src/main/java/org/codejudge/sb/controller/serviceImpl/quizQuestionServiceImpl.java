@@ -29,7 +29,7 @@ public class quizQuestionServiceImpl{
         if(quizQuestion!=null)
             findQuestions(quiz_id);
         if(question!=null){
-            quizQuestion.setQuestionList(question);
+            quizQuestion.setQuestions(question);
             return quizQuestion;
         }
         return null;

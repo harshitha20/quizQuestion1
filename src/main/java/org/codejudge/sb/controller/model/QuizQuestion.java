@@ -1,5 +1,6 @@
 package org.codejudge.sb.controller.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Table(name="quiz")
 @Getter
 @Setter
+@JsonIgnoreProperties("id")
 public class QuizQuestion {
 
     @Id
@@ -23,12 +25,12 @@ public class QuizQuestion {
     private String description;
 
     @Transient
-    private List<Question> questionList;
+    private List<Question> questions;
 
-    public QuizQuestion(String name, String description, List<Question> questionList) {
+    public QuizQuestion(String name, String description, List<Question> questions) {
         this.name = name;
         this.description = description;
-        this.questionList = questionList;
+        this.questions = questions;
     }
 
     public QuizQuestion() {
