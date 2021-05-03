@@ -1,6 +1,5 @@
 package org.codejudge.sb.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import org.codejudge.sb.controller.model.Question;
 import org.codejudge.sb.controller.model.Quiz;
@@ -53,9 +52,8 @@ public class AppController {
     @ResponseBody
     public ResponseEntity addQuiz(@RequestBody String quiz) {
         JSONObject json = new JSONObject(quiz);
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            if(!json.has("id") && json.has("name") && json.has("description")) {
+            if (!json.has("id") && json.has("name") && json.has("description")) {
                 String name = json.get("name").toString();
                 String description = json.get("description").toString();
                 Quiz newQuiz = new Quiz();
@@ -88,22 +86,32 @@ public class AppController {
 
     @RequestMapping(path = "/api/questions/", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity addQuestion(@RequestBody Question question) {
-        Question newQuestion = question;
-        if (newQuestion != null) {
-            String options = newQuestion.getOptions();
-            List optionsList = Arrays.asList(options.split(","));
-            if (optionsList.size() > 0 && (newQuestion.getCorrect_option() > optionsList.size() || newQuestion.getCorrect_option() <= 0)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(4)));
-            }
-            Long quiz_id = newQuestion.getQuiz();
-            if (quizService.findById(quiz_id) == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(5)));
-            }
-        }
+    public ResponseEntity addQuestion(@RequestBody String question) {
+        JSONObject json = new JSONObject(question);
         try {
-            questionServiceImpl.loadData(newQuestion);
-            return ResponseEntity.status(HttpStatus.CREATED).body(question);
+            if(!json.has("id") && json.has("name") && json.has("options")
+            && json.has("correct_option") && json.has("quiz") && json.has("points")) {
+                Question newQuestion = new Question();
+                newQuestion.setName(json.get("name").toString());
+                newQuestion.setOptions(json.get("options").toString());
+                newQuestion.setCorrect_option(Integer.valueOf(json.get("correct_option").toString()));
+                newQuestion.setQuiz(Long.valueOf(json.get("quiz").toString()));
+                newQuestion.setPoints(Integer.valueOf(json.get("points").toString()));
+                if (newQuestion != null) {
+                    String options = newQuestion.getOptions();
+                    List optionsList = Arrays.asList(options.split(","));
+                    if (optionsList.size() > 0 && (newQuestion.getCorrect_option() > optionsList.size() || newQuestion.getCorrect_option() <= 0)) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(4)));
+                    }
+                    Long quiz_id = newQuestion.getQuiz();
+                    if (quizService.findById(quiz_id) == null) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(5)));
+                    }
+                }
+                questionServiceImpl.loadData(newQuestion);
+                return ResponseEntity.status(HttpStatus.CREATED).body(newQuestion);
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(6)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorService.findById(Long.valueOf(3)));
         }
