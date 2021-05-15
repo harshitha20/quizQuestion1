@@ -1,13 +1,13 @@
 package org.codejudge.sb.controller.serviceImpl;
 
-import org.codejudge.sb.controller.model.Question;
 import org.codejudge.sb.controller.model.Quiz;
 import org.codejudge.sb.controller.service.quizService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
+import java.awt.print.Pageable;
 import java.util.List;
 
 @Service
@@ -28,10 +28,9 @@ public class quizServiceImpl implements quizService {
         return quiz;
     }
 
-    /*@Override
-    public List<Quiz> findAll()
+    public List<Quiz> findAllQuizWithlimit(int limit,int offset)
     {
-        return (List<Quiz>) quizRepository.findAll();
-    }*/
+        return quizRepository.findQuiz((Pageable) new PageRequest(offset,limit));
+    }
 
 }

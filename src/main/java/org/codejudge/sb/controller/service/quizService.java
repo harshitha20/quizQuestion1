@@ -5,8 +5,8 @@ import org.codejudge.sb.controller.model.Quiz;
 
 public interface quizService {
 
-    public Quiz findById(Long id);
+    Quiz findById(Long id);
 
-    public Quiz loadData(Quiz quiz);
+    Quiz loadData(Quiz quiz);
 
 }
