@@ -7,6 +7,7 @@ import org.codejudge.sb.controller.model.QuizQuestion;
 import org.codejudge.sb.controller.serviceImpl.errorServiceImpl;
 import org.codejudge.sb.controller.serviceImpl.questionServiceImpl;
 import org.codejudge.sb.controller.serviceImpl.quizQuestionServiceImpl;
+import org.codejudge.sb.controller.serviceImpl.quizServiceImpl;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,9 @@ public class AppController {
 
     @Autowired
     private org.codejudge.sb.controller.service.quizService quizService;
+
+    @Autowired
+    private quizServiceImpl quizServiceImpl;
 
     @Autowired
     private errorServiceImpl errorService;
@@ -46,6 +50,15 @@ public class AppController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new EmptyJsonBody());
         }
         return ResponseEntity.status(HttpStatus.OK).body(quiz);
+    }
+
+    @GetMapping("/api/quiz/{limit}/{offset}")
+    public ResponseEntity findQuiz(@PathVariable int limit, @PathVariable int offset) {
+        List<Quiz> quizList = quizServiceImpl.findAllQuizWithlimit(limit,offset);
+        if (quizList == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new EmptyJsonBody());
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(quizList);
     }
 
     @RequestMapping(path = "/api/quiz/", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
